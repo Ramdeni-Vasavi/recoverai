@@ -1,164 +1,209 @@
 # RecoverAI
 
-## AI-Powered Revenue Recovery for Failed Payments
+## AI-Assisted Revenue Recovery for Failed Payments
 
-RecoverAI is an AI-powered payment recovery prototype designed to help businesses recover revenue from failed payments through intelligent recovery decisions.
+RecoverAI is an AI/ML-assisted revenue recovery prototype designed to help businesses make safer and more intelligent decisions for failed payments.
 
-Instead of applying the same retry strategy to every failed payment, RecoverAI analyzes payment-related signals, predicts recovery probability, selects an appropriate recovery action, optimizes the recovery strategy, applies safety guardrails, and executes the approved recovery flow.
+Instead of applying the same recovery strategy to every failed payment, RecoverAI evaluates payment signals, estimates recovery probability, selects a suitable recovery action, optimizes the recovery strategy, applies safety guardrails, and executes the approved action in a controlled simulation environment.
+
+The system is designed around the following recovery pipeline:
+
+**Failed Payment → ML Prediction → Recovery Decision → Optimization → Guardrails → Execution → Dashboard & Audit**
+
+---
 
 ## Problem
 
-Failed payments can result in significant revenue loss for businesses.
+Failed payments can directly contribute to revenue leakage for businesses.
 
-A simple retry-everything strategy can lead to:
+A simple "retry everything" approach can result in:
 
 - Unnecessary retry attempts
 - Poor customer experience
-- Ineffective recovery
+- Inefficient recovery strategies
+- Repeated attempts on unsuitable payments
 - Increased operational overhead
 
-RecoverAI addresses this problem by making the recovery process more intelligent and controlled.
+RecoverAI addresses this problem by introducing prediction, decisioning, optimization, and safety controls into the payment recovery workflow.
 
-The system determines:
-
-- Whether a failed payment is suitable for recovery
-- Which recovery action should be selected
-- How the recovery strategy should be optimized
-- Whether the strategy satisfies safety guardrails
-- Whether the approved action can be safely executed
+---
 
 ## Solution
 
-RecoverAI implements the following recovery pipeline:
+RecoverAI provides an end-to-end recovery decision pipeline for failed payments.
 
-**Failed Payment → ML Prediction → AI Decision Engine → Optimization → Guardrails → Recovery Execution → Dashboard**
+### 1. Payment Ingestion
 
-### 1. Payment Input
+Payment information can enter the system through:
 
-The system accepts payment information through backend payment APIs and provides a Razorpay webhook endpoint for receiving payment events.
+- Backend payment APIs
+- Razorpay webhook events
 
-### 2. ML Recovery Prediction
+The Razorpay webhook integration validates the webhook signature before processing supported payment events.
 
-A machine-learning model predicts the probability of recovering a failed payment.
+Currently supported webhook events include:
+
+- `payment.failed`
+- `payment.captured`
+
+Razorpay integration is implemented as a secure integration boundary. The current prototype does not make outbound Razorpay API calls for real payment retries.
+
+---
+
+### 2. ML-Based Recovery Prediction
+
+RecoverAI uses a machine-learning model to estimate the probability that a failed payment can be recovered.
 
 The current prototype uses:
 
 - Logistic Regression
 - Feature-based prediction
-- Deterministic synthetic/demo training data
+- Runtime model training
+- Versioned model identification
 
-The prediction result is used by the decision engine to select an appropriate recovery strategy.
+The current training data is intentionally synthetic/demo data and is **not production Razorpay customer data**.
 
-> The training dataset is synthetic/demo data and is not production Razorpay customer data.
+Therefore, the prototype does not claim production-level model accuracy or performance.
 
-### 3. AI Decision Engine
+The prediction output is used by the recovery decision layer.
 
-The decision engine converts the recovery probability and payment state into a recovery action.
+---
 
-Supported recovery actions include:
+### 3. Recovery Decision Engine
+
+The recovery decision layer converts the predicted recovery probability and payment state into a controlled recovery action.
+
+Supported recovery actions are:
 
 - `retry_payment`
 - `create_payment_link`
 - `send_reminder`
 - `stop_recovery`
 
-The decision policy also considers retry limits and non-retryable payment conditions to avoid unnecessary recovery attempts.
+The current policy applies probability thresholds, retry limits, and payment failure conditions.
 
-### 4. Recovery Optimization
+The prototype's automated policy primarily selects:
 
-After selecting a recovery action, the system evaluates recovery configurations through an optimization layer.
+- Retry payment for sufficiently high recovery probability
+- Payment link for medium recovery probability
+- Stop recovery when recovery is unlikely or the failure condition is non-retryable
+
+The `send_reminder` action is supported by the recovery action model, while the current decision policy does not automatically select it as its primary outcome.
+
+This layer is implemented as deterministic policy-based AI/ML-assisted decisioning rather than an LLM-based autonomous agent.
+
+---
+
+### 4. Recovery Strategy Optimization
+
+After the recovery decision is generated, RecoverAI evaluates candidate recovery strategies through an optimization layer.
 
 The optimization pipeline includes:
 
-- Candidate generation
+- Candidate action generation
+- Fitness-based scoring
 - Metaheuristic optimization
-- Quantum-inspired scoring
+- Quantum-inspired classical scoring
 - Guardrail evaluation
 
-The quantum-inspired component is implemented using classical computation and does not require a quantum computer.
+The optimizer combines the base fitness score with a quantum-inspired score to select the highest-scoring valid recovery strategy.
+
+The quantum-inspired component uses classical mathematical computation. It does **not** require a quantum computer.
+
+---
 
 ### 5. Safety Guardrails
 
-Before execution, the selected recovery strategy is validated against safety and business constraints.
+Safety and business constraints are applied before recovery execution.
 
-The guardrail layer helps detect:
+The guardrail and execution validation layers help prevent:
 
 - Invalid recovery actions
 - Unsafe retry attempts
-- Payment/action mismatches
-- Blocked recovery strategies
-- Stale optimization results
+- Exceeding retry limits
+- Payment and optimization mismatches
+- Execution of non-approved actions
+- Use of stale optimization results
+- Duplicate recovery execution
+- Execution of blocked strategies
 
-### 6. Recovery Execution
+Every recovery execution is validated against the approved optimization and guardrail state before it can proceed.
 
-Only an approved recovery action is passed to the execution layer.
+---
 
-The current prototype operates in **simulation mode**.
+### 6. Controlled Recovery Execution
 
-Therefore:
+The current prototype operates in:
+
+**Simulation Mode**
+
+This means:
 
 - No real customer payment is retried
-- No real payment link is sent
-- No real customer communication is triggered
+- No real payment link is created through an external payment API
+- No real customer communication is sent
+- No real money movement is performed
 
-This allows the complete recovery workflow to be demonstrated safely without affecting real payments.
+The execution layer records the recovery attempt and its result, allowing the complete recovery workflow to be demonstrated safely.
 
-## Key Features
+A sandbox execution mode is represented in the architecture, but the current prototype intentionally blocks it unless properly configured.
 
-- Failed-payment recovery prediction
-- Machine-learning based recovery probability
-- Intelligent recovery decision engine
-- Retry-limit and payment-state policies
-- Recovery strategy optimization
-- Metaheuristic optimization
-- Quantum-inspired scoring
-- Safety and business guardrails
-- Recovery execution validation
-- Razorpay webhook signature verification
-- Recovery dashboard
-- REST APIs for each recovery stage
-- Automated backend tests
+---
 
-## System Architecture
+## End-to-End Workflow
 
 ```text
-                    Failed Payment
-                          |
-                          v
-                +-------------------+
-                | Payment API /     |
-                | Razorpay Webhook  |
-                +---------+---------+
-                          |
-                          v
-                +-------------------+
-                | ML Prediction     |
-                | Recovery Probability
-                +---------+---------+
-                          |
-                          v
-                +-------------------+
-                | AI Decision Engine|
-                | Select Action     |
-                +---------+---------+
-                          |
-                          v
-                +-------------------+
-                | Recovery          |
-                | Optimization      |
-                +---------+---------+
-                          |
-                          v
-                +-------------------+
-                | Safety Guardrails |
-                | Validate Strategy |
-                +---------+---------+
-                          |
-                          v
-                +-------------------+
-                | Recovery Execution|
-                | Simulation Mode   |
-                +---------+---------+
-                          |
-                          v
-                    Dashboard
+                         FAILED PAYMENT
+                               |
+                               v
+                  +--------------------------+
+                  | Payment API / Razorpay   |
+                  | Webhook Ingestion         |
+                  +------------+-------------+
+                               |
+                               v
+                  +--------------------------+
+                  | Payment Persistence      |
+                  | & Validation             |
+                  +------------+-------------+
+                               |
+                               v
+                  +--------------------------+
+                  | ML Recovery Prediction   |
+                  | Logistic Regression      |
+                  +------------+-------------+
+                               |
+                               v
+                  +--------------------------+
+                  | Recovery Decision Engine |
+                  | Policy + Retry Limits    |
+                  +------------+-------------+
+                               |
+                               v
+                  +--------------------------+
+                  | Candidate Generation     |
+                  | & Optimization           |
+                  +------------+-------------+
+                               |
+                               v
+                  +--------------------------+
+                  | Quantum-Inspired         |
+                  | Classical Scoring        |
+                  +------------+-------------+
+                               |
+                               v
+                  +--------------------------+
+                  | Safety Guardrails         |
+                  | & Validation              |
+                  +------------+-------------+
+                               |
+                               v
+                  +--------------------------+
+                  | Recovery Execution        |
+                  | Simulation Mode           |
+                  +------------+-------------+
+                               |
+                               v
+                  +--------------------------+
+                  | Dashboard & Audit Logs    |
+                  +--------------------------+
