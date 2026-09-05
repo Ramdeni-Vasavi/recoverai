@@ -193,17 +193,17 @@ A sandbox execution mode is represented in the architecture, but the current pro
                                |
                                v
                   +--------------------------+
-                  | Safety Guardrails         |
-                  | & Validation              |
+                  | Safety Guardrails        |
+                  | & Validation             |
                   +------------+-------------+
                                |
                                v
                   +--------------------------+
-                  | Recovery Execution        |
-                  | Simulation Mode           |
+                  | Recovery Execution       |
+                  | Simulation Mode          |
                   +------------+-------------+
                                |
                                v
                   +--------------------------+
-                  | Dashboard & Audit Logs    |
+                  | Dashboard & Audit Logs   |
                   +--------------------------+
